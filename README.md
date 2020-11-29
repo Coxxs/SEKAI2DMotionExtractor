@@ -1,9 +1,9 @@
-# SeKai2DMotionExtractor
-一个针对特定游戏 Live2D Motion 资源的提取工具。
+# SEKAI2DMotionExtractor
+一个针对**特定游戏** Live2D Motion 资源的提取工具。
 
 通过读取 `.moc3` 获得参数列表，提取 `.anim` 文件、绑定参数并转换回 `.motion3.json`。Motion 以外的其他资源需自行提取。
 
-程序中通过硬编码的 `/live2d/motion` 关键词寻找指定的资源，因此不直接适用于其他游戏。
+**程序中通过硬编码的 `/live2d/motion` 关键词寻找指定的资源，因此不直接适用于其他游戏。**
 
 基于 [UnityLive2DExtractor](https://github.com/Perfare/UnityLive2DExtractor) 修改而成。
 
