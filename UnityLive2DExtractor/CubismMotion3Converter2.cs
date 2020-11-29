@@ -6,15 +6,14 @@ using AssetStudio;
 
 namespace UnityLive2DExtractor
 {
-    class CubismMotion3Converter
+    class CubismMotion3Converter2
     {
         private Dictionary<uint, string> bonePathHash = new Dictionary<uint, string>();
         public List<ImportedKeyframedAnimation> AnimationList { get; protected set; } = new List<ImportedKeyframedAnimation>();
 
-        public CubismMotion3Converter(GameObject rootGameObject, AnimationClip[] animationClips)
+        public CubismMotion3Converter2(List<string> paramNames, List<string> partsNames, AnimationClip[] animationClips)
         {
-            var rootTransform = GetTransform(rootGameObject);
-            CreateBonePathHash(rootTransform);
+            CreateBonePathHash(paramNames, partsNames);
             ConvertAnimations(animationClips);
         }
 
@@ -105,20 +104,33 @@ namespace UnityLive2DExtractor
             target = null;
             if (path != 0 && bonePathHash.TryGetValue(path, out var boneName))
             {
+                // Console.WriteLine("bonePathHash {0} -> {1}", path, boneName);
                 var index = boneName.LastIndexOf('/');
                 id = boneName.Substring(index + 1);
                 target = boneName.Substring(0, index);
                 if (target == "Parameters")
                 {
+                    if (!boneName.StartsWith("Param") && !boneName.StartsWith("PARAM"))
+                    {
+                        Console.WriteLine("bonePathHash {0} -> {1}", path, boneName);
+                    }
                     target = "Parameter";
                 }
                 else if (target == "Parts")
                 {
+                    if (!boneName.StartsWith("Parts") && !boneName.StartsWith("PARTS"))
+                    {
+                        Console.WriteLine("bonePathHash {0} -> {1}", path, boneName);
+                    }
                     target = "PartOpacity";
                 }
             }
             else
             {
+                if (path != 0)
+                {
+                    Console.WriteLine("bonePathHash NOT FOUND! {0}", path);
+                }
                 binding.script.TryGet(out MonoScript script);
                 switch (script.m_ClassName)
                 {
@@ -138,39 +150,26 @@ namespace UnityLive2DExtractor
             }
         }
 
-        private Transform GetTransform(GameObject gameObject)
+        private void CreateBonePathHash(List<string> paramNames, List<string> partsNames)
         {
-            foreach (var m_Component in gameObject.m_Components)
+            foreach (var name in paramNames)
             {
-                if (m_Component.TryGet(out Transform m_Transform))
-                {
-                    return m_Transform;
-                }
-            }
-
-            return null;
-        }
-
-        private void CreateBonePathHash(Transform m_Transform)
-        {
-            var name = GetTransformPath(m_Transform);
-            var crc = new SevenZip.CRC();
-            var bytes = Encoding.UTF8.GetBytes(name);
-            crc.Update(bytes, 0, (uint)bytes.Length);
-            bonePathHash[crc.GetDigest()] = name;
-            int index;
-            while ((index = name.IndexOf("/", StringComparison.Ordinal)) >= 0)
-            {
-                name = name.Substring(index + 1);
-                crc = new SevenZip.CRC();
-                bytes = Encoding.UTF8.GetBytes(name);
+                var crc = new SevenZip.CRC();
+                var bytes = Encoding.UTF8.GetBytes("Parameters/" + name);
                 crc.Update(bytes, 0, (uint)bytes.Length);
-                bonePathHash[crc.GetDigest()] = name;
+                if (bonePathHash.ContainsKey(crc.GetDigest())) 
+                    Console.WriteLine("DuplicateKey!");
+                bonePathHash[crc.GetDigest()] = "Parameters/" + name;
             }
-            foreach (var pptr in m_Transform.m_Children)
+
+            foreach (var name in partsNames)
             {
-                if (pptr.TryGet(out var child))
-                    CreateBonePathHash(child);
+                var crc = new SevenZip.CRC();
+                var bytes = Encoding.UTF8.GetBytes("Parts/" + name);
+                crc.Update(bytes, 0, (uint)bytes.Length);
+                if (bonePathHash.ContainsKey(crc.GetDigest())) 
+                    Console.WriteLine("DuplicateKey!");
+                bonePathHash[crc.GetDigest()] = "Parts/" + name;
             }
         }
 
