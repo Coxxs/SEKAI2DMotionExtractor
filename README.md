@@ -5,7 +5,7 @@
 
 **程序中通过硬编码的 `/live2d/motion` 关键词寻找指定的资源，因此不直接适用于其他游戏。**
 
-基于 [UnityLive2DExtractor](https://github.com/Perfare/UnityLive2DExtractor) 修改而成。
+基于 [UnityLive2DExtractor](https://github.com/Perfare/UnityLive2DExtractor) 修改而成，版权归原作者所有。
 
 ## Usage
 拖放（反混淆后的）按需下载资源文件夹到exe上，将在文件夹所在目录生成`Live2DOutput`目录
